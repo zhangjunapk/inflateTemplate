@@ -51,10 +51,10 @@ public class MSWordTool {
 		Map<String,String> content = new HashMap<String,String>();
 		content.put("adr", "格式规范、标准统一、利于阅览");
 		content.put("aaa", "格式规范、标准统一、利于阅览");
-		changer.replaceBookMark(content);
+		changer.replaceBookMark(content,null);
 
 		//保存替换后的WORD
-		changer.saveAs();
+		changer.saveAs("/media/zhangjun/新加卷/","after.docx");
 		System.out.println("time=="+(System.currentTimeMillis() - startTime));
 
 	}
@@ -86,7 +86,7 @@ public class MSWordTool {
 	 * 进行标签替换的例子,传入的Map中，key表示标签名称，value是替换的信息
 	 * @param indicator
 	 */
-	public void  replaceBookMark(Map<String,String> indicator) {
+	public void  replaceBookMark(Map<String,String> indicator,Map<String,String> inTableParam) {
 		//循环进行替换
 		Iterator<String> bookMarkIter = bookMarks.getNameIterator();
 		while (bookMarkIter.hasNext()) {
@@ -97,7 +97,11 @@ public class MSWordTool {
 
 			//进行替换
 			if (indicator.get(bookMarkName)!=null) {
-				bookMark.insertTextAtBookMark(indicator.get(bookMarkName), BookMark.INSERT_BEFORE);
+				if(bookMark.isInTable()){
+					inTableParam.put(bookMarkName,indicator.get(bookMarkName));
+				}else {
+					bookMark.insertTextAtBookMark(indicator.get(bookMarkName), BookMark.INSERT_BEFORE);
+				}
 			}
 
 		}
@@ -238,8 +242,17 @@ public class MSWordTool {
 		}
 	}
 
-	public void saveAs() {
-		File newFile = new File("/media/zhangjun/新加卷/too.docx");
+	public void saveAs(String toPath,String fileName) {
+		File path = new File(toPath);
+		path.mkdirs();
+		File newFile=new File(toPath+fileName);
+		if(!newFile.exists()){
+			try {
+				newFile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		FileOutputStream fos = null;
 		try {
 			fos = new FileOutputStream(newFile);
